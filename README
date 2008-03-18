@@ -1,0 +1,33 @@
+
+NuMySQL is a small portable wrapper for the MySQL C interface. 
+
+	
+REQUIREMENTS
+
+NuMySQL requires Nu and nuke, the Nu build tool. To obtain
+Nu, please visit http://programming.nu or get the source
+from the Nu git repository on github:
+	http://github.com/timburks/nu
+	
+NuMySQL requires mysql. Before building NuMySQL, please 
+be sure that mysql is installed on your system. The
+default build configuration expects mysql to be installed
+in /usr/local/mysql.
+	
+The primary NuMySQL repository is on github:
+	http://github.com/timburks/numysql
+
+	
+INSTALLATION
+
+After installing all prerequisites, build the NuMySQL framework
+by typing "nuke" in the top-level NuMySQL directory.
+
+
+AUTHOR
+
+NuMySQL was written by Tim Burks.
+
+NuMySQL is released under the Apache License, version 2.0.
+
+Copyright 2008, Neon Design Technology, Inc.
