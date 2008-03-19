@@ -45,7 +45,7 @@ limitations under the License.
     return object;
 }
 
-- (id) nextRow
+- (id) nextRowArray
 {
     int fields = mysql_num_fields(result);
     MYSQL_ROW row = mysql_fetch_row(result);
@@ -54,10 +54,30 @@ limitations under the License.
     else {
         NSMutableArray *array = [NSMutableArray array];
         for (int i = 0; i < fields; i++) {
-            [array addObject:[NSString stringWithCString:row[i]
+            if (row[i])
+                [array addObject:[NSString stringWithCString:row[i]
                 encoding:NSUTF8StringEncoding]];
+            else
+                [array addObject:[NSNull null]];
         }
         return array;
+    }
+}
+
+- (id) nextRowDictionary
+{
+    int fields = mysql_num_fields(result);
+    MYSQL_ROW row = mysql_fetch_row(result);
+    if (row == NULL)
+        return nil;
+    else {
+        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        for (int i = 0; i < fields; i++) {
+            NSString *key = [NSString stringWithCString:mysql_fetch_field_direct(result, i)->name encoding:NSUTF8StringEncoding];
+            id object = row[i] ? [NSString stringWithCString:row[i] encoding:NSUTF8StringEncoding] : [NSNull null];
+            [dictionary setObject:object forKey:key];
+        }
+        return dictionary;
     }
 }
 
