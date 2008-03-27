@@ -2,15 +2,18 @@
 (set @m_files     (filelist "^objc/.*.m$"))
 (set @nu_files 	  (filelist "^nu/.*nu$"))
 
+(set mysql_cflags ((NSString stringWithShellCommand:"mysql_config --cflags") chomp))
+(set mysql_libs   ((NSString stringWithShellCommand:"mysql_config --libs") chomp))
+
 (set SYSTEM ((NSString stringWithShellCommand:"uname") chomp))
 (case SYSTEM
       ("Darwin"
-               (set @cflags "-g -std=gnu99 -DDARWIN -I/usr/local/mysql/include/mysql")
-               (set @ldflags "-framework Foundation -framework Nu -lmysqlclient -L/usr/local/mysql/lib/mysql"))
+               (set @cflags "-g -std=gnu99 -DDARWIN #{mysql_cflags}")
+               (set @ldflags "-framework Foundation -framework Nu #{mysql_libs}"))
       ("Linux"
               (set @arch (list "i386"))
-              (set @cflags "-g -DLINUX -I/usr/local/mysql/include -fconstant-string-class=NSConstantString ")
-              (set @ldflags "-L/usr/local/lib -lNuFound -lNu -lmysqlclient -L/usr/local/mysql/lib/mysql"))
+              (set @cflags "-g -std=gnu99 -DLINUX -fconstant-string-class=NSConstantString #{mysql_cflags}")
+              (set @ldflags "-L/usr/local/lib -lNuFound -lNu #{mysql_libs}"))
       (else nil))
 
 ;; framework description
