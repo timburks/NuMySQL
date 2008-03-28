@@ -33,13 +33,13 @@ values
 ('bart', 'lisa', 'sister'),
 ('lisa', 'homer', 'father'),
 ('lisa', 'marge', 'mother'),
-('lisa', 'bart', 'brother')	
+('lisa', 'bart', 'brother')
 END))
         (set result (m query:"select * from triples"))
         (assert_equal 12 (result rowCount))
         (set result (m query:"select * from triples where subject = 'homer'"))
         (assert_equal 3 (result rowCount))
-        (while (set d (result nextRowDictionary))
+        (while (set d (result nextRowAsDictionary))
                (case (d valueForKey:"object")
                      ("bart"   (assert_equal "son"      (d valueForKey:"relation")))
                      ("lisa"   (assert_equal "daughter" (d valueForKey:"relation")))
@@ -47,6 +47,6 @@ END))
                      (else nil)))
         (set result (m query:"select object from triples where subject = 'homer' and relation = 'son'"))
         (assert_equal 1 (result rowCount))
-        (set row (result nextRowArray))
+        (set row (result nextRowAsArray))
         (assert_equal "bart" (row objectAtIndex:0))
         (set result (m query:"drop database NuMySQLTest"))))

@@ -45,7 +45,7 @@ limitations under the License.
     return object;
 }
 
-- (id) nextRowArray
+- (id) nextRowAsArray
 {
     int fields = mysql_num_fields(result);
     MYSQL_ROW row = mysql_fetch_row(result);
@@ -64,7 +64,7 @@ limitations under the License.
     }
 }
 
-- (id) nextRowDictionary
+- (id) nextRowAsDictionary
 {
     int fields = mysql_num_fields(result);
     MYSQL_ROW row = mysql_fetch_row(result);
