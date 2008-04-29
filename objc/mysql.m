@@ -52,11 +52,11 @@ limitations under the License.
     if (row == NULL)
         return nil;
     else {
+        unsigned long *lengths = mysql_fetch_lengths(result);
         NSMutableArray *array = [NSMutableArray array];
         for (int i = 0; i < fields; i++) {
             if (row[i])
-                [array addObject:[NSString stringWithCString:row[i]
-                encoding:NSUTF8StringEncoding]];
+                [array addObject:[[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSASCIIStringEncoding]];
             else
                 [array addObject:[NSNull null]];
         }
@@ -66,15 +66,26 @@ limitations under the License.
 
 - (id) nextRowAsDictionary
 {
-    int fields = mysql_num_fields(result);
+    int fieldCount = mysql_num_fields(result);
+    NSMutableArray *fields = [NSMutableArray array];
+    for (int i = 0; i < fieldCount; i++) {
+        NSString *key = [NSString stringWithCString:mysql_fetch_field_direct(result, i)->name encoding:NSASCIIStringEncoding];
+        [fields addObject:key];
+    }
     MYSQL_ROW row = mysql_fetch_row(result);
     if (row == NULL)
         return nil;
     else {
+        unsigned long *lengths = mysql_fetch_lengths(result);
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        for (int i = 0; i < fields; i++) {
-            NSString *key = [NSString stringWithCString:mysql_fetch_field_direct(result, i)->name encoding:NSUTF8StringEncoding];
-            id object = row[i] ? [NSString stringWithCString:row[i] encoding:NSUTF8StringEncoding] : [NSNull null];
+        for (int i = 0; i < fieldCount; i++) {
+            NSString *key = [fields objectAtIndex:i];
+            id object = nil;
+            if (!row[i])
+                object = [NSNull null];
+            else {
+                object = [[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSASCIIStringEncoding];
+            }
             [dictionary setObject:object forKey:key];
         }
         return dictionary;
