@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #import <Foundation/Foundation.h>
+#import <Nu/Nu.h>
 #import "mysql.h"
 
 @interface MySQLField : NSObject
@@ -119,6 +120,15 @@ limitations under the License.
 @end
 
 @implementation MySQLConnection
+
++ (void) load
+{
+    static int initialized = 0;
+    if (!initialized) {
+        initialized = 1;
+        [Nu loadNuFile:@"mysql" fromBundleWithIdentifier:@"nu.programming.mysql" withContext:nil];
+    }
+}
 
 - (id) init
 {

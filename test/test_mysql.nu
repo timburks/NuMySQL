@@ -49,4 +49,25 @@ END))
         (assert_equal 1 (result rowCount))
         (set row (result nextRowAsArray))
         (assert_equal "bart" (row objectAtIndex:0))
+        
+        (set result (m queryAsValue:"select * from triples where subject = 'homer' and relation = 'wife'"))
+        (assert_equal "marge" (result "object"))
+        
+        (set result (m queryAsDictionary:"select * from triples where subject = 'homer'" withKey:"relation"))
+        (assert_equal "lisa" ((result "daughter") "object"))
+        
+        (set result (m queryAsArray:"select * from triples"))
+        (assert_equal 12 (result count))
+        
+        ;; some empty queries
+        
+        (set result (m queryAsValue:"select * from triples where subject = 'homer' and relation = 'husband'"))
+        (assert_equal nil result)
+        
+        (set result (m queryAsDictionary:"select * from triples where subject = 'homer' and relation = 'husband'" withKey:"relation"))
+        (assert_equal 0 (result count))
+        
+        (set result (m queryAsArray:"select * from triples where subject = 'homer' and relation = 'husband'"))
+        (assert_equal 0 (result count))
+        
         (set result (m query:"drop database NuMySQLTest"))))
