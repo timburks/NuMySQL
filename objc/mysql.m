@@ -171,4 +171,25 @@ limitations under the License.
     }
 }
 
+- (MySQLResult *) updateTable:(NSString *) tableName withDictionary:(NSDictionary *) dictionary forId:(int) identifier
+{
+    NSMutableString *command = [NSMutableString stringWithFormat:@"update %@ set ", tableName];
+    NSEnumerator *keyEnumerator = [[dictionary allKeys] objectEnumerator];
+    NSObject *key;
+    bool first = YES;
+    while ((key = [keyEnumerator nextObject])) {
+        if (!first)
+            [command appendString:@", "];
+        first = NO;
+        id value = [dictionary objectForKey:key];
+        char *escapedValue = (char *) malloc ((1 + 2 * [value length]) * sizeof(char));
+        mysql_escape_string(escapedValue, (const char *)[value cStringUsingEncoding:NSUTF8StringEncoding], [value length]);
+        [command appendFormat:@"%@ = '%s'", key, escapedValue];
+        free(escapedValue);
+    }
+    [command appendFormat:@" where id = %d", identifier];
+    //NSLog(@"command is %@", command);
+    return [self query:command];
+}
+
 @end

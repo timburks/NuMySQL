@@ -7,7 +7,7 @@
 
 (class TestMySQL is NuTestCase
      
-     (- (id) testFamily is
+     (- testFamily is
         (set m ((MySQLConnection alloc) init))
         (set result (m connect))
         (assert_equal 1 result)
@@ -70,4 +70,38 @@ END))
         (set result (m queryAsArray:"select * from triples where subject = 'homer' and relation = 'husband'"))
         (assert_equal 0 (result count))
         
+        (set result (m query:"drop database NuMySQLTest")))
+     
+     
+     (- testUpdate is
+        (set m ((MySQLConnection alloc) init))
+        (set result (m connect))
+        (assert_equal 1 result)
+        (set result (m query:"create database if not exists NuMySQLTest"))
+        (set result (m selectDB:"NuMySQLTest"))
+        (set result (m query:<<-END
+  create table cities (
+    id integer,
+  	city text,
+  	nation text)					
+  END))
+        (set result (m query:<<-END
+  insert into cities ( id, city, nation )
+  values 
+  (1, 'San Francisco', 'United States'),
+  (2, 'Tokyo', 'Japan'),
+  (3, 'Bangalore', 'India'),
+  (4, 'Copenhagen', 'Denmark')
+  END))
+        (set result (m query:"select * from cities"))
+        (assert_equal 4 (result rowCount))
+        (set result (m updateTable:"cities" withDictionary:(dict city:"Yokohama") forId:2))
+        (set result (m queryAsValue:"select * from cities where id = 2"))
+        (assert_equal "Yokohama" (result "city"))
+        (assert_equal "Japan" (result "nation"))
+        (set result (m updateTable:"cities" withDictionary:(dict city:"London" nation:"England") forId:4))
+        (set result (m queryAsValue:"select * from cities where id = 4"))
+        (assert_equal "London" (result "city"))
+        (assert_equal "England" (result "nation"))        
         (set result (m query:"drop database NuMySQLTest"))))
+
