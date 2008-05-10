@@ -72,6 +72,27 @@ END))
         
         (set result (m query:"drop database NuMySQLTest")))
      
+     (- testInsert is
+        (set m ((MySQLConnection alloc) init))
+        (set result (m connect))
+        (assert_equal 1 result)
+        (set result (m query:"create database if not exists NuMySQLTest"))
+        (set result (m selectDB:"NuMySQLTest"))
+        (set result (m query:<<-END
+create table cities (
+  id integer PRIMARY KEY AUTO_INCREMENT,
+  city text,
+  nation text)					
+END))
+        (set result (m insertRowInTable:"cities" withDictionary:(dict city:"San Francisco" nation:"United States")))
+        (set result (m insertRowInTable:"cities" withDictionary:(dict city:"Tokyo" nation:"Japan")))
+        (set result (m insertRowInTable:"cities" withDictionary:(dict city:"Bangalore" nation:"India")))
+        (set result (m insertRowInTable:"cities" withDictionary:(dict city:"Copenhagen" nation:"Denmark")))        
+        (set result (m query:"select * from cities"))
+        (assert_equal 4 (result rowCount))
+        (set result ((m queryAsDictionary:"select * from cities" withKey:"nation")))
+        (assert_equal "Tokyo" ((result "Japan") "city"))
+        (set result (m query:"drop database NuMySQLTest")))
      
      (- testUpdate is
         (set m ((MySQLConnection alloc) init))
@@ -102,6 +123,7 @@ END))
         (set result (m updateTable:"cities" withDictionary:(dict city:"London" nation:"England") forId:4))
         (set result (m queryAsValue:"select * from cities where id = 4"))
         (assert_equal "London" (result "city"))
-        (assert_equal "England" (result "nation"))        
+        (assert_equal "England" (result "nation"))
         (set result (m query:"drop database NuMySQLTest"))))
+
 
