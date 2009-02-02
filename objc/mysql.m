@@ -57,7 +57,7 @@ limitations under the License.
         NSMutableArray *array = [NSMutableArray array];
         for (int i = 0; i < fields; i++) {
             if (row[i])
-                [array addObject:[[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSASCIIStringEncoding]];
+                [array addObject:[[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSUTF8StringEncoding]];
             else
                 [array addObject:[NSNull null]];
         }
@@ -70,7 +70,7 @@ limitations under the License.
     int fieldCount = mysql_num_fields(result);
     NSMutableArray *fields = [NSMutableArray array];
     for (int i = 0; i < fieldCount; i++) {
-        NSString *key = [NSString stringWithCString:mysql_fetch_field_direct(result, i)->name encoding:NSASCIIStringEncoding];
+        NSString *key = [NSString stringWithCString:mysql_fetch_field_direct(result, i)->name encoding:NSUTF8StringEncoding];
         [fields addObject:key];
     }
     MYSQL_ROW row = mysql_fetch_row(result);
@@ -85,7 +85,7 @@ limitations under the License.
             if (!row[i])
                 object = [NSNull null];
             else {
-                object = [[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSASCIIStringEncoding];
+                object = [[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSUTF8StringEncoding];
             }
             [dictionary setObject:object forKey:key];
         }
