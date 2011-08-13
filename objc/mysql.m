@@ -68,29 +68,67 @@ limitations under the License.
 - (id) nextRowAsDictionary
 {
     int fieldCount = mysql_num_fields(result);
-    NSMutableArray *fields = [NSMutableArray array];
+	int *fieldTypes = (int *) malloc(fieldCount * sizeof(int));
+    NSMutableArray *fieldNames = [NSMutableArray array];
     for (int i = 0; i < fieldCount; i++) {
-        NSString *key = [NSString stringWithCString:mysql_fetch_field_direct(result, i)->name encoding:NSUTF8StringEncoding];
-        [fields addObject:key];
+		MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
+        NSString *key = [NSString stringWithCString:field->name encoding:NSUTF8StringEncoding];
+        [fieldNames addObject:key];
+		fieldTypes[i] = field->type;
     }
     MYSQL_ROW row = mysql_fetch_row(result);
-    if (row == NULL)
-        return nil;
-    else {
+	id value = nil;
+    if (row == NULL) {
+        value = nil;
+    } else {
         unsigned long *lengths = mysql_fetch_lengths(result);
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         for (int i = 0; i < fieldCount; i++) {
-            NSString *key = [fields objectAtIndex:i];
+            NSString *key = [fieldNames objectAtIndex:i];
             id object = nil;
             if (!row[i])
                 object = [NSNull null];
             else {
-                object = [[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSUTF8StringEncoding];
+	    		object = [[NSString alloc] initWithBytes:row[i] length:lengths[i] encoding:NSUTF8StringEncoding];
+				switch(fieldTypes[i]) {
+					case MYSQL_TYPE_TINY:
+					case MYSQL_TYPE_SHORT:
+					case MYSQL_TYPE_LONG:
+					case MYSQL_TYPE_INT24:
+					case MYSQL_TYPE_LONGLONG:
+						object = [NSNumber numberWithInt:[object intValue]];
+						break;
+					case MYSQL_TYPE_FLOAT:
+						object = [NSNumber numberWithFloat:[object floatValue]];
+						break;
+					case MYSQL_TYPE_DOUBLE:
+						object = [NSNumber numberWithDouble:[object doubleValue]];
+						break;
+					case MYSQL_TYPE_DECIMAL:	//DECIMAL or NUMERIC field
+					case MYSQL_TYPE_NEWDECIMAL:	//Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up)					
+					case MYSQL_TYPE_BIT:		//BIT field (MySQL 5.0.3 and up)
+					case MYSQL_TYPE_TIMESTAMP:	//TIMESTAMP field
+					case MYSQL_TYPE_DATE:		//DATE field
+					case MYSQL_TYPE_TIME:		//TIME field
+					case MYSQL_TYPE_DATETIME:	//DATETIME field
+					case MYSQL_TYPE_YEAR:		//YEAR field
+					case MYSQL_TYPE_STRING:		//CHAR or BINARY field
+					case MYSQL_TYPE_VAR_STRING:	//VARCHAR or VARBINARY field
+					case MYSQL_TYPE_BLOB:		//BLOB or TEXT field (use max_length to determine the maximum length)
+					case MYSQL_TYPE_SET:		//SET field
+					case MYSQL_TYPE_ENUM:		//ENUM field
+					case MYSQL_TYPE_GEOMETRY:	//Spatial field
+					case MYSQL_TYPE_NULL:		//NULL-type field
+					default:
+						break;
+				}
             }
             [dictionary setObject:object forKey:key];
         }
-        return dictionary;
+        value = dictionary;
     }
+	free(fieldTypes);
+	return value;
 }
 
 - (int) rowCount
@@ -141,7 +179,36 @@ limitations under the License.
 {
     connection = mysql_real_connect(&mysql, "", "root", "", "", 0, 0, 0);
     if (!connection) {
-        NSLog(@"FAIL");
+        NSLog(@"Connection Failed");
+        return NO;
+    }
+    return YES;
+}
+
+- (BOOL) connectWithOptions:(NSDictionary *) options {
+	const char *host = "";
+	const char *username = "root";
+	const char *password = "";
+	const char *db = "";
+	unsigned int port = 0;
+	const char *unix_socket = 0;
+	unsigned long client_flag = 0;
+	
+	if ([options objectForKey:@"host"]) {
+		host = [[options objectForKey:@"host"] cStringUsingEncoding:NSUTF8StringEncoding];
+	}
+	if ([options objectForKey:@"username"]) {
+		username = [[options objectForKey:@"username"] cStringUsingEncoding:NSUTF8StringEncoding];
+	}
+	if ([options objectForKey:@"password"]) {
+		password = [[options objectForKey:@"password"] cStringUsingEncoding:NSUTF8StringEncoding];
+	}
+	if ([options objectForKey:@"db"]) {
+		db = [[options objectForKey:@"db"] cStringUsingEncoding:NSUTF8StringEncoding];
+	}
+	connection = mysql_real_connect(&mysql, host, username, password, db, port, unix_socket, client_flag);
+    if (!connection) {
+        NSLog(@"Connection Failed");
         return NO;
     }
     return YES;

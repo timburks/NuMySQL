@@ -6,9 +6,11 @@
 ;;(set mysql_cflags "-I/usr/local/mysql/include -arch i386 -fno-common")
 (set mysql_libs   ((NSString stringWithShellCommand:"mysql_config --libs") chomp))
 
+
 (set SYSTEM ((NSString stringWithShellCommand:"uname") chomp))
 (case SYSTEM
       ("Darwin"
+               (set @arch (list "x86_64"))
                (set @cflags "-g -std=gnu99 -DDARWIN #{mysql_cflags}")
                (set @ldflags "-framework Foundation -framework Nu #{mysql_libs}"))
       ("Linux"
@@ -31,10 +33,6 @@
 (task "default" => "framework")
 
 (task "doc" is (SH "nudoc"))
-
-(task "install" => "framework" is
-      (SH "sudo rm -rf /Library/Frameworks/#{@framework}.framework")
-      (SH "ditto #{@framework}.framework /Library/Frameworks/#{@framework}.framework"))
 
 (task "test" => "framework" is
       (SH "nutest test/test_*.nu"))
