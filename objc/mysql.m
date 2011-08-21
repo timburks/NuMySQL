@@ -104,13 +104,18 @@ limitations under the License.
 					case MYSQL_TYPE_DOUBLE:
 						object = [NSNumber numberWithDouble:[object doubleValue]];
 						break;
-					case MYSQL_TYPE_DECIMAL:	//DECIMAL or NUMERIC field
-					case MYSQL_TYPE_NEWDECIMAL:	//Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up)					
-					case MYSQL_TYPE_BIT:		//BIT field (MySQL 5.0.3 and up)
 					case MYSQL_TYPE_TIMESTAMP:	//TIMESTAMP field
 					case MYSQL_TYPE_DATE:		//DATE field
 					case MYSQL_TYPE_TIME:		//TIME field
 					case MYSQL_TYPE_DATETIME:	//DATETIME field
+						object = [NSDate dateWithNaturalLanguageString:object];
+						break;
+					case MYSQL_TYPE_NULL:		//NULL-type field
+						object = [NSNull null];
+						break;
+					case MYSQL_TYPE_DECIMAL:	//DECIMAL or NUMERIC field
+					case MYSQL_TYPE_NEWDECIMAL:	//Precision math DECIMAL or NUMERIC field (MySQL 5.0.3 and up)					
+					case MYSQL_TYPE_BIT:		//BIT field (MySQL 5.0.3 and up)
 					case MYSQL_TYPE_YEAR:		//YEAR field
 					case MYSQL_TYPE_STRING:		//CHAR or BINARY field
 					case MYSQL_TYPE_VAR_STRING:	//VARCHAR or VARBINARY field
@@ -118,12 +123,13 @@ limitations under the License.
 					case MYSQL_TYPE_SET:		//SET field
 					case MYSQL_TYPE_ENUM:		//ENUM field
 					case MYSQL_TYPE_GEOMETRY:	//Spatial field
-					case MYSQL_TYPE_NULL:		//NULL-type field
 					default:
 						break;
 				}
             }
-            [dictionary setObject:object forKey:key];
+			if (object) {
+            	[dictionary setObject:object forKey:key];
+			}
         }
         value = dictionary;
     }
