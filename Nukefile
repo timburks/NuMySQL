@@ -4,8 +4,8 @@
 
 (set mysql_cflags ((NSString stringWithShellCommand:"mysql_config --cflags") chomp))
 ;;(set mysql_cflags "-I/usr/local/mysql/include -arch i386 -fno-common")
-(set mysql_libs   ((NSString stringWithShellCommand:"mysql_config --libs") chomp))
-
+;;(set mysql_libs   ((NSString stringWithShellCommand:"mysql_config --libs") chomp))
+(set mysql_libs "/usr/local/mysql/lib/libmysqlclient.a")
 
 (set SYSTEM ((NSString stringWithShellCommand:"uname") chomp))
 (case SYSTEM
